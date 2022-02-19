@@ -18,7 +18,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                sh 'mvn test -U -Dsurefire.useFile=false -Dsurefire.useSystemClassLoader=false -DtestResources=src/test/java/org/knime/devops/exercise'
+                sh 'mvn test -U -Dsurefire.useFile=false -Dsurefire.useSystemClassLoader=false'
             }
         }
         stage('Result') {
