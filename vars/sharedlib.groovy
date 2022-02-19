@@ -1,24 +1,23 @@
 def call(String repoUrl) {
-pipeline {
+    pipeline {
     agent any
     tools {
             maven 'Maven' 
           }
     stages {
-        stage('Clone sources') {
+        stage('Checkout') {
             steps {
-                git branch: 'main',
-                url: "${repoUrl}"
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/gopika-18/Jenkins_exercise.git']]])
             }
         }
-        stage('Build') {
+        stage('Compile') {
             steps {
-                sh 'mvn -V -U -e clean install -Dsurefire.useFile=false -Dmaven.test.skip=true'
+                sh 'mvn clean install -Dsurefire.useFile=false -Dmaven.test.skip=true'
             } 
         }
         stage('Test') {
             steps {
-                sh 'mvn test -U -Dsurefire.useFile=false -Dsurefire.useSystemClassLoader=false'
+                sh 'mvn test -Dmaven.test.failure.ignore=true'
             }
         }
         stage('Result') {
@@ -29,14 +28,14 @@ pipeline {
         stage('SonarQube analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh "mvn -V -U -e sonar:sonar"
+                   sh 'mvn -e -V -U sonar:sonar'  
                 }
             }
         }
     }
     post {
         always {
-            archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
+            archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: false
              build job: 'java_pipeline'
         }
     }   
